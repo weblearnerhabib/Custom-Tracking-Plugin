@@ -8,4 +8,8 @@ Download the plugin from github.
 3. Upload the plugin
 4. Let's Enjoy
 
+# to add form in front end use this shortcode
+
+[tracking_search_form_results]
+
 # Thanks
