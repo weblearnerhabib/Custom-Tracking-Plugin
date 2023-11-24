@@ -120,7 +120,7 @@ function handle_admin_tracking_form_submission() {
         $table_name = $wpdb->prefix . 'tracking_data';
 
         // Generate a simple tracking code (you can use a more complex algorithm if needed)
-        $tracking_code = 'TC' . uniqid();
+        $tracking_code = 'MicroGeeks' . sprintf('%04d', mt_rand(0, 99999));
 
         $name = sanitize_text_field($_POST['name']);
         $status = sanitize_text_field($_POST['status']);
@@ -167,7 +167,7 @@ function display_tracked_data() {
     echo '<th>Service</th>';
     echo '<th>Delivery Mode</th>';
     echo '<th>Edit</th>';
-    echo '<th>Delete</th>';
+    // echo '<th>Delete</th>';
     echo '</tr>';
     echo '</thead>';
     echo '<tbody>';
@@ -182,7 +182,7 @@ function display_tracked_data() {
         echo '<td>' . $data->service . '</td>';
         echo '<td>' . $data->delivery_mode . '</td>';
         echo '<td><a href="' . admin_url('admin.php?page=tracking-data&action=edit&tracking_id=' . $data->id) . '">Edit</a></td>';
-        echo '<td><a href="' . admin_url('admin.php?page=tracking-data&action=delete&tracking_id=' . $data->id) . '">Delete</a></td>';
+        // echo '<td><a href="' . admin_url('admin.php?page=tracking-data&action=delete&tracking_id=' . $data->id) . '">Delete</a></td>';
         echo '</tr>';
     }
 
@@ -285,16 +285,21 @@ function edit_tracking_data_page($tracking_id) {
 // Function to handle delete action
 function delete_tracking_data_page($tracking_id) {
     if ($tracking_id > 0) {
-        // Add your code to delete the data
         global $wpdb;
         $table_name = $wpdb->prefix . 'tracking_data';
-        $wpdb->delete($table_name, array('id' => $tracking_id));
+        $result = $wpdb->delete($table_name, array('id' => $tracking_id));
+
+        if ($result === false) {
+            // Log or display the error
+            error_log($wpdb->last_error);
+        }
 
         // Redirect back to the admin tracking data page after deletion
         wp_redirect(admin_url('admin.php?page=tracking-data'));
         exit();
     }
 }
+
 
 // Shortcode to display the search form and results on the front end
 function tracking_search_form_results_shortcode() {
