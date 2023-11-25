@@ -4,7 +4,7 @@ ob_start(); // Add this line
  * Plugin Name:       Custom Tracking Plugin
  * Plugin URI:        https://github.com/weblearnerhabib/
  * Description:       Custom Tracking Plugin to Track.
- * Version:           2.0.1
+ * Version:           2.1.7
  * Requires at least: 5.3
  * Requires PHP:      7.2
  * Author:            Freelancer Habib
@@ -29,6 +29,7 @@ function create_tracking_table() {
         status varchar(50),
         service varchar(50),
         delivery_mode varchar(50),
+        delivery_date_time datetime,
         PRIMARY KEY  (id)
     ) $charset_collate;";
 
@@ -105,9 +106,13 @@ function add_tracking_data_page() {
             <input type="text" name="service">
 
             <label for="delivery_mode">Delivery Mode:</label>
-            <input type="text" name="delivery_mode">
+            <input type="text" name="delivery_mode"> <br> <br>
 
-            <input type="submit" name="submit_tracking" value="Submit">
+            <label for="delivery_date_time">Delivery Date & Time:</label>
+            <input type="datetime-local" name="delivery_date_time"> <br> <br>
+
+
+            <input type="submit" name="submit_tracking" value="Submit" style="color: white; background: red; border: none; padding: 7px 50px; font-weight: 700; cursor: pointer; font-size: 17px; border-radius: 5px;">
         </form>
     </div>
     <?php
@@ -127,6 +132,8 @@ function handle_admin_tracking_form_submission() {
         $service = sanitize_text_field($_POST['service']);
         $delivery_mode = sanitize_text_field($_POST['delivery_mode']);
 
+        $delivery_date_time = isset($_POST['delivery_date_time']) ? sanitize_text_field($_POST['delivery_date_time']) : '';
+
         $wpdb->insert(
             $table_name,
             array(
@@ -135,8 +142,10 @@ function handle_admin_tracking_form_submission() {
                 'status' => $status,
                 'service' => $service,
                 'delivery_mode' => $delivery_mode,
+                'delivery_date_time' => $delivery_date_time,
             )
         );
+
 
         // Redirect to the admin tracking data page after submission
         wp_redirect(admin_url('admin.php?page=tracking-data'));
@@ -166,6 +175,7 @@ function display_tracked_data() {
     echo '<th>Status</th>';
     echo '<th>Service</th>';
     echo '<th>Delivery Mode</th>';
+    echo '<th>Delivery Date & Time</th>';
     echo '<th>Edit</th>';
     // echo '<th>Delete</th>';
     echo '</tr>';
@@ -181,8 +191,8 @@ function display_tracked_data() {
         echo '<td>' . $data->status . '</td>';
         echo '<td>' . $data->service . '</td>';
         echo '<td>' . $data->delivery_mode . '</td>';
+        echo '<td>' . $data->delivery_date_time . '</td>';
         echo '<td><a href="' . admin_url('admin.php?page=tracking-data&action=edit&tracking_id=' . $data->id) . '">Edit</a></td>';
-        // echo '<td><a href="' . admin_url('admin.php?page=tracking-data&action=delete&tracking_id=' . $data->id) . '">Delete</a></td>';
         echo '</tr>';
     }
 
@@ -233,6 +243,8 @@ function edit_tracking_data_page($tracking_id) {
         $service = sanitize_text_field($_POST['service']);
         $delivery_mode = sanitize_text_field($_POST['delivery_mode']);
 
+        $delivery_date_time = isset($_POST['delivery_date_time']) ? sanitize_text_field($_POST['delivery_date_time']) : '';
+
         $wpdb->update(
             $table_name,
             array(
@@ -240,6 +252,7 @@ function edit_tracking_data_page($tracking_id) {
                 'status' => $status,
                 'service' => $service,
                 'delivery_mode' => $delivery_mode,
+                'delivery_date_time' => $delivery_date_time,
             ),
             array('id' => $tracking_id)
         );
@@ -273,9 +286,14 @@ function edit_tracking_data_page($tracking_id) {
                 <input type="text" name="service" value="<?php echo esc_attr($tracking_data->service); ?>">
 
                 <label for="delivery_mode">Delivery Mode:</label>
-                <input type="text" name="delivery_mode" value="<?php echo esc_attr($tracking_data->delivery_mode); ?>">
+                <input type="text" name="delivery_mode" value="<?php echo esc_attr($tracking_data->delivery_mode); ?>"> <br> <br>
 
-                <input type="submit" name="submit_tracking" value="Update">
+                <label for="delivery_date_time">Delivery Date & Time:</label>
+                <input type="datetime-local" name="delivery_date_time" value="<?php echo esc_attr($tracking_data->delivery_date_time); ?>"> <br> <br>
+
+
+
+                <input type="submit" name="submit_tracking" value="Update" style="color: white; background: #033540; border: none; padding: 7px 50px; font-weight: 700; cursor: pointer; font-size: 17px; border-radius: 5px;">
             </form>
         </div>
         <?php
@@ -316,7 +334,7 @@ function tracking_search_form_results_shortcode() {
         $table_name = $wpdb->prefix . 'tracking_data';
         $search_results = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT tracking_code, name, status, service, delivery_mode FROM $table_name WHERE tracking_code = %s",
+                "SELECT tracking_code, name, status, delivery_date_time, service, delivery_mode FROM $table_name WHERE tracking_code = %s",
                 $search_tracking_code
             )
         );
@@ -328,6 +346,7 @@ function tracking_search_form_results_shortcode() {
         echo '<th>Tracking Code</th>';
         echo '<th>Name</th>';
         echo '<th>Status</th>';
+        echo '<th>Delivery Date & Time</th>';
         echo '<th>Service</th>';
         echo '<th>Delivery Mode</th>';
         echo '</tr>';
@@ -340,6 +359,7 @@ function tracking_search_form_results_shortcode() {
             echo '<td>' . $result->tracking_code . '</td>';
             echo '<td>' . $result->name . '</td>';
             echo '<td>' . $result->status . '</td>';
+            echo '<td>' . $result->delivery_date_time . '</td>';
             echo '<td>' . $result->service . '</td>';
             echo '<td>' . $result->delivery_mode . '</td>';
             echo '</tr>';
